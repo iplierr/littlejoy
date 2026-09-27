@@ -284,10 +284,19 @@ $("start").addEventListener("click", () => {
 });
 
 $("exit-tut").addEventListener("click", () => {
-  if (confirm("Leave the tutorial? Your progress on this project won't be saved.")) go("prep");
+  if (confirm("Leave the tutorial? You can continue it later from My Journey → Still making.")) go("prep");
 });
 
+// Remember this tutorial as "Still making" (which step you're on), so it can be
+// continued or removed from My Journey. Cleared once the project is saved as finished.
+function rememberProgress() {
+  const a = state.activity;
+  const before = Store.getInProgress().find((p) => p.projectId === a.id);
+  Store.saveInProgress({ projectId: a.id, step: state.step, startedOn: before ? before.startedOn : Date.now() });
+}
+
 function renderStep() {
+  rememberProgress();
   const a = state.activity;
   const s = a.steps[state.step];
   const n = a.steps.length;
@@ -427,6 +436,7 @@ $("save").addEventListener("click", async () => {
       },
       state.photo
     );
+    Store.removeInProgress(a.id); // finished, so it's no longer "Still making"
     if ($("share-community").checked) {
       await Store.addPost({ projectId: a.id, caption: review || `I made ${a.name} with LittleJoy!`, photo: state.photo });
     }
@@ -508,6 +518,27 @@ function renderJourney() {
 
   showLiked("journey-liked", "journey-liked-names", "journey-liked-cards");
 
+  // Still making: tutorials started but not saved as finished yet.
+  const unfinished = Store.getInProgress().filter((p) => projectById(p.projectId));
+  $("progress-block").hidden = !unfinished.length;
+  $("progress-gallery").innerHTML = unfinished.map((p) => {
+    const project = projectById(p.projectId);
+    const step = Math.min(p.step + 1, project.steps.length);
+    return `
+    <figure class="creation glass">
+      <div class="creation-art">${finalSketch(project)}</div>
+      <figcaption>
+        <b>${esc(project.name)}</b>
+        <span class="cat-tag small">${catTag(project.category)}</span>
+        <small>On step ${step} of ${project.steps.length} · started ${esc(fmtDate(p.startedOn))}</small>
+        <div class="creation-actions">
+          <button class="btn small primary continue-progress" data-id="${esc(p.projectId)}">Continue</button>
+          <button class="btn small remove-entry remove-progress" data-id="${esc(p.projectId)}" aria-label="Remove ${esc(project.name)} from Still making">Remove</button>
+        </div>
+      </figcaption>
+    </figure>`;
+  }).join("");
+
   $("gallery").innerHTML = j.length
     ? j.map((x, i) => {
         const project = projectById(x.projectId);
@@ -529,6 +560,28 @@ function renderJourney() {
       }).join("")
     : `<div class="glass panel empty">Nothing here yet — your finished projects will show up here like a scrapbook.</div>`;
 }
+
+// Still making cards: "Continue" reopens the tutorial on the saved step; "Remove" forgets it.
+$("progress-gallery").addEventListener("click", (e) => {
+  const button = e.target.closest(".continue-progress, .remove-progress");
+  if (!button) return;
+  const saved = Store.getInProgress().find((p) => p.projectId === button.dataset.id);
+  const project = saved && projectById(saved.projectId);
+  if (!project) return;
+  if (button.classList.contains("remove-progress")) {
+    if (!confirm(`Remove "${project.name}" from Still making?`)) return;
+    Store.removeInProgress(project.id);
+    renderJourney();
+    return;
+  }
+  state.from = "journey";
+  state.activity = project;
+  state.step = Math.min(saved.step, project.steps.length - 1);
+  state.startedAt = Date.now();
+  renderPrep(); // so "Overview" / Exit lead back to this project
+  renderStep();
+  go("tutorial");
+});
 
 // "Remove" on a My Journey card → confirm, delete it, then redraw (stats, stamps and picks update too).
 $("gallery").addEventListener("click", async (e) => {

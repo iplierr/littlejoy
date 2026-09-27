@@ -149,6 +149,25 @@ const Store = (() => {
     writeLocal(JOURNEY_KEY, journey);
   }
 
+  // ---------- Unfinished projects ("Still making") ----------
+  // Saved in this browser when a tutorial starts, updated on every step, cleared when saved as finished.
+  const PROGRESS_KEY = "littlejoy-in-progress";
+
+  function getInProgress() {
+    return readLocal(PROGRESS_KEY, []);
+  }
+
+  // Adds or updates one unfinished project (one entry per project).
+  function saveInProgress(entry) {
+    const list = getInProgress().filter((x) => x.projectId !== entry.projectId);
+    list.unshift({ ...entry, updatedAt: Date.now() });
+    writeLocal(PROGRESS_KEY, list);
+  }
+
+  function removeInProgress(projectId) {
+    writeLocal(PROGRESS_KEY, getInProgress().filter((x) => x.projectId !== projectId));
+  }
+
   // ---------- Community ----------
   // Example posts so the Community page isn't empty before anyone shares.
   function examplePosts() {
@@ -284,6 +303,7 @@ const Store = (() => {
     onUserChange: (fn) => listeners.push(fn),
     signIn, signOut,
     getJourney, addJourneyEntry, removeJourneyEntry,
+    getInProgress, saveInProgress, removeInProgress,
     getPosts, addPost, toggleLike, addComment,
     exportJourney, importJourney,
   };
