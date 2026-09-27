@@ -509,7 +509,7 @@ function renderJourney() {
   showLiked("journey-liked", "journey-liked-names", "journey-liked-cards");
 
   $("gallery").innerHTML = j.length
-    ? j.map((x) => {
+    ? j.map((x, i) => {
         const project = projectById(x.projectId);
         const art = safeImg(x.photo)
           ? `<img src="${safeImg(x.photo)}" alt="${esc(x.name)}">`
@@ -523,11 +523,29 @@ function renderJourney() {
             <span class="stars-small" aria-label="${x.rating || 0} out of 5 stars">${starText(x.rating || 0)}</span>
             <small>Completed ${esc(fmtDate(x.date))}${x.minutes ? ` · ${x.minutes} min` : ""}</small>
             ${x.review ? `<q>${esc(x.review)}</q>` : ""}
+            <button class="btn small remove-entry" data-index="${i}" aria-label="Remove ${esc(x.name)} from my journey">Remove</button>
           </figcaption>
         </figure>`;
       }).join("")
     : `<div class="glass panel empty">Nothing here yet — your finished projects will show up here like a scrapbook.</div>`;
 }
+
+// "Remove" on a My Journey card → confirm, delete it, then redraw (stats, stamps and picks update too).
+$("gallery").addEventListener("click", async (e) => {
+  const button = e.target.closest(".remove-entry");
+  if (!button) return;
+  const entry = state.journey[Number(button.dataset.index)];
+  if (!entry) return;
+  if (!confirm(`Remove "${entry.name}" from your journey?\n\nThis can't be undone (unless you have a backup from your Profile).`)) return;
+  button.disabled = true;
+  try {
+    await Store.removeJourneyEntry(entry);
+  } catch (err) {
+    alert("Couldn't remove it. Please try again.");
+  }
+  await refreshJourney();
+  renderJourney();
+});
 
 // ---------- Screen: Community ----------
 $("post-project").innerHTML = ACTIVITIES.map((a) => `<option value="${a.id}">${a.emoji} ${a.name}</option>`).join("");

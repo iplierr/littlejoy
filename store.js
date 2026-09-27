@@ -135,6 +135,20 @@ const Store = (() => {
     writeLocal(JOURNEY_KEY, journey, (j) => j.slice(5).forEach((x) => (x.photo = null)));
   }
 
+  // Removes one finished project from the journey.
+  // Browser-saved entries have no id, so they're matched by their completion date + name.
+  async function removeJourneyEntry(entry) {
+    if (signedIn() && entry.id) {
+      await withTimeout(fb.db.collection("users").doc(currentUser.uid).collection("journey").doc(entry.id).delete());
+      return;
+    }
+    const journey = readLocal(JOURNEY_KEY, []);
+    const i = journey.findIndex((x) => x.date === entry.date && x.name === entry.name);
+    if (i === -1) return;
+    journey.splice(i, 1);
+    writeLocal(JOURNEY_KEY, journey);
+  }
+
   // ---------- Community ----------
   // Example posts so the Community page isn't empty before anyone shares.
   function examplePosts() {
@@ -269,7 +283,7 @@ const Store = (() => {
     user: () => currentUser,
     onUserChange: (fn) => listeners.push(fn),
     signIn, signOut,
-    getJourney, addJourneyEntry,
+    getJourney, addJourneyEntry, removeJourneyEntry,
     getPosts, addPost, toggleLike, addComment,
     exportJourney, importJourney,
   };

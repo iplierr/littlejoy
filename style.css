@@ -673,6 +673,13 @@ textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-c
 .creation figcaption b { font-family: var(--hand); font-size: 1.5rem; line-height: 1.1; }
 .creation small { color: var(--ink-soft); font-weight: 600; }
 .creation q { font-family: var(--hand); font-size: 1.2rem; color: var(--pink-pen); }
+/* "Remove" on a journey card: quiet until you point at it */
+.creation .remove-entry { align-self: flex-start; margin-top: 8px; min-height: 40px; padding: 6px 14px; font-size: 0.85rem; color: var(--ink-soft); }
+.creation .remove-entry:hover:not(:disabled) {
+  color: #a3243c; border-color: #c9566b;
+  background: linear-gradient(180deg, #fff7f8 0%, #ffe9ec 49%, #ffd6dc 50%, #ffe4e8 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 0 8px rgba(220, 80, 100, 0.35);
+}
 .stars-small { color: #ffb400; letter-spacing: 1px; }
 .empty { text-align: center; color: var(--ink-soft); font-weight: 700; grid-column: 1 / -1; }
 
