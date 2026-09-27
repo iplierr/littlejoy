@@ -11,15 +11,16 @@
 // with them. What protects your data is the security rules in firestore.rules and storage.rules.
 
 // Google sign-in and cloud saving are switched OFF. Projects are saved in the
-// browser (and can be backed up from the Profile page). Set this to true to turn
-// Firebase back on — the keys below are kept for that.
+// browser (and can be backed up from the Profile page).
+// To turn Firebase back on: set this to true and paste your project's keys below
+// (Firebase console → Project settings → Your apps).
 const FIREBASE_ENABLED = false;
 
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAR63bwpAG9BF4AI5oHNH-lCYIkAkxXMf0",
-  authDomain: "joylab-413f2.firebaseapp.com",
-  projectId: "joylab-413f2",
-  storageBucket: "joylab-413f2.firebasestorage.app",
-  messagingSenderId: "527433628817",
-  appId: "1:527433628817:web:72ae55892cd08a4f591330",
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
 };
