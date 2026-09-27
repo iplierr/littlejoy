@@ -15,6 +15,7 @@ const Store = (() => {
   const POSTS_KEY = "littlejoy-posts";
   const COMMENTS_KEY = "littlejoy-comments";
   const LIKES_KEY = "littlejoy-liked";
+  const HIDDEN_POSTS_KEY = "littlejoy-hidden-posts"; // example posts the user deleted
   const FIREBASE_VERSION = "10.12.2";
 
   let fb = null; // { auth, db, storage } once Firebase has loaded
@@ -191,6 +192,7 @@ const Store = (() => {
         const likes = p.likes || [];
         return {
           id: d.id,
+          mine: !!currentUser && p.uid === currentUser.uid,
           userName: p.userName,
           userPhoto: p.userPhoto,
           projectId: p.projectId,
@@ -206,8 +208,10 @@ const Store = (() => {
 
     const liked = readLocal(LIKES_KEY, []);
     const comments = readLocal(COMMENTS_KEY, {});
-    return [...readLocal(POSTS_KEY, []), ...examplePosts()].map((p) => ({
+    const hidden = readLocal(HIDDEN_POSTS_KEY, []);
+    return [...readLocal(POSTS_KEY, []), ...examplePosts().filter((p) => !hidden.includes(p.id))].map((p) => ({
       ...p,
+      mine: true, // in guest mode every post lives in this browser, so any of them can be deleted
       likes: liked.includes(p.id) ? 1 : 0,
       liked: liked.includes(p.id),
       comments: comments[p.id] || [],
@@ -246,6 +250,19 @@ const Store = (() => {
     }
     const liked = readLocal(LIKES_KEY, []);
     writeLocal(LIKES_KEY, liked.includes(post.id) ? liked.filter((x) => x !== post.id) : [...liked, post.id]);
+  }
+
+  async function deletePost(postId) {
+    if (cloudOn()) {
+      requireSignIn();
+      await withTimeout(fb.db.collection("posts").doc(postId).delete());
+      return;
+    }
+    if (String(postId).startsWith("example-")) {
+      writeLocal(HIDDEN_POSTS_KEY, [...readLocal(HIDDEN_POSTS_KEY, []), postId]);
+      return;
+    }
+    writeLocal(POSTS_KEY, readLocal(POSTS_KEY, []).filter((p) => p.id !== postId));
   }
 
   async function addComment(postId, text) {
@@ -304,7 +321,7 @@ const Store = (() => {
     signIn, signOut,
     getJourney, addJourneyEntry, removeJourneyEntry,
     getInProgress, saveInProgress, removeInProgress,
-    getPosts, addPost, toggleLike, addComment,
+    getPosts, addPost, deletePost, toggleLike, addComment,
     exportJourney, importJourney,
   };
 })();

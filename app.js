@@ -656,6 +656,7 @@ function postCard(p) {
       <button class="like ${p.liked ? "on" : ""}" aria-pressed="${p.liked}" aria-label="Like">${p.liked ? "♥" : "♡"} ${p.likes}</button>
       <span class="count">💬 ${p.comments.length}</span>
       ${project ? `<button class="btn primary small try">Try this project</button>` : ""}
+      ${p.mine ? `<button class="btn small remove-entry delete-post" aria-label="Delete this post">Delete</button>` : ""}
     </div>
     <div class="comments">
       ${p.comments.map((c) => `<p><b>${esc(c.userName)}</b> ${esc(c.text)}</p>`).join("")}
@@ -668,6 +669,16 @@ function postCard(p) {
   el.querySelector(".like").addEventListener("click", async () => {
     try {
       await Store.toggleLike(p);
+      renderCommunity();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+  const deleteBtn = el.querySelector(".delete-post");
+  if (deleteBtn) deleteBtn.addEventListener("click", async () => {
+    if (!confirm("Delete this post from the Community?")) return;
+    try {
+      await Store.deletePost(p.id);
       renderCommunity();
     } catch (err) {
       alert(err.message);
