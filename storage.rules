@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Who can upload photos.
+// Paste this into Firebase Console → Storage → Rules.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Journey photos: only the owner can upload or view them.
+    match /users/{uid}/journey/{file} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Community photos: anyone can view, only the owner can upload.
+    match /users/{uid}/posts/{file} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
