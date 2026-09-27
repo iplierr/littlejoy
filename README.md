@@ -31,7 +31,7 @@ LittleJoy fixes this missing link in creative technology. It is a structured, vi
 
 ## How to Run the Project
 
-- Online Deployment: (Insert your GitHub Pages link here)
+- Online Deployment: https://iplierr.github.io/littlejoy/ 
 - Local Environment: You can download or clone this repository and open index.html directly in any modern web browser. There are no installations, packages, or build steps required to make it run.
 
 ## Architecture and Tech Stack
