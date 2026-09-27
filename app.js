@@ -648,6 +648,7 @@ function postCard(p) {
       <span class="avatar">${avatar}</span>
       <div><b>${esc(p.userName)}</b><small>${timeAgo(p.createdAt)}</small></div>
       ${p.example ? `<span class="badge">Example</span>` : ""}
+      ${p.mine ? `<button class="btn small delete-post" aria-label="Delete this post">🗑 Delete</button>` : ""}
     </header>
     <div class="post-art">${art}</div>
     <p class="caption">${esc(p.caption)}</p>
@@ -656,7 +657,6 @@ function postCard(p) {
       <button class="like ${p.liked ? "on" : ""}" aria-pressed="${p.liked}" aria-label="Like">${p.liked ? "♥" : "♡"} ${p.likes}</button>
       <span class="count">💬 ${p.comments.length}</span>
       ${project ? `<button class="btn primary small try">Try this project</button>` : ""}
-      ${p.mine ? `<button class="btn small remove-entry delete-post" aria-label="Delete this post">Delete</button>` : ""}
     </div>
     <div class="comments">
       ${p.comments.map((c) => `<p><b>${esc(c.userName)}</b> ${esc(c.text)}</p>`).join("")}

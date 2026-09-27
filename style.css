@@ -711,6 +711,8 @@ textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-c
 .post-art img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .caption { margin: 0; font-weight: 700; font-size: 1.05rem; }
 .post-project { margin: 0; color: var(--ink-soft); font-size: 0.9rem; font-weight: 700; }
+.post-head .delete-post { margin-left: auto; min-height: 34px; padding: 4px 12px; font-size: 0.85rem; }
+.post-head .badge + .delete-post { margin-left: 0; }
 .post-actions { display: flex; align-items: center; gap: 12px; }
 .post-actions .try { margin-left: auto; }
 .like {
